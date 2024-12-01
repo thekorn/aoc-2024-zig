@@ -80,7 +80,7 @@ pub fn Counter(comptime K: type) type {
     };
 }
 
-test "utils - Counter" {
+test "utils -> Counter" {
     const CounterStr = Counter(i32);
     var counter = try CounterStr.init(gpa);
     try counter.add(1);
