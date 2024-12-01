@@ -1,5 +1,7 @@
 # AOC 2024 in zig
 
+![ci workflow](https://github.com/thekorn/aoc-2024-zig/actions/workflows/ci.yaml/badge.svg)
+
 solution of the [Advent of Code 2024](https://adventofcode.com/2024) in zig
 
 ## setup
