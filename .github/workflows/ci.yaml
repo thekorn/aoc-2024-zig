@@ -30,4 +30,4 @@ jobs:
       - run: nix flake check
 
       - name: build & test
-        run: nix develop -c zig build test --summary all
+        run: nix develop -c zig build test
