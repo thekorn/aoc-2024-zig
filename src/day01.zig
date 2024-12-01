@@ -8,19 +8,14 @@ pub fn solve(content: []const u8, add_weight: bool) !i32 {
     var left = utils.List(i32).init(utils.gpa);
     var right = utils.List(i32).init(utils.gpa);
 
-    var counter = utils.Map(i32, i32).init(utils.gpa);
+    var counter = try utils.Counter(i32, i32).init(utils.gpa);
 
     while (readIter.next()) |line| {
         var lineIter = std.mem.tokenizeSequence(u8, line, " ");
         try left.append(try utils.parseInt(i32, lineIter.next().?, 10));
 
         const r = try utils.parseInt(i32, lineIter.next().?, 10);
-        if (counter.contains(r)) {
-            const v = counter.get(r) orelse unreachable;
-            try counter.put(r, v + 1);
-        } else {
-            try counter.put(r, 1);
-        }
+        try counter.add(r);
         try right.append(r);
     }
     const l = try left.toOwnedSlice();

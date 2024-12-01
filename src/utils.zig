@@ -1,5 +1,5 @@
 const std = @import("std");
-const Allocator = std.mem.Allocator;
+pub const Allocator = std.mem.Allocator;
 pub const List = std.ArrayList;
 pub const Map = std.AutoHashMap;
 pub const StrMap = std.StringHashMap;
@@ -52,4 +52,30 @@ pub fn codeToChar(code: usize) u8 {
     } else {
         return 'A' + @as(u8, @intCast(code)) - 26;
     }
+}
+
+pub fn Counter(comptime K: type, comptime V: type) type {
+    return struct {
+        const Self = @This();
+        items: Map(K, V),
+
+        pub fn init(alloc: Allocator) !Self {
+            return .{
+                .items = Map(K, V).init(alloc),
+            };
+        }
+
+        pub fn add(self: *Self, key: K) !void {
+            const cnt = try self.items.getOrPut(key);
+            if (cnt.found_existing) {
+                cnt.value_ptr.* += 1;
+            } else {
+                cnt.value_ptr.* = 1;
+            }
+        }
+
+        pub fn get(self: *Self, key: K) ?V {
+            return self.items.get(key);
+        }
+    };
 }
