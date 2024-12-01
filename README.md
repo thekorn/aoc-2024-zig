@@ -1,6 +1,12 @@
 # AOC 2024 in zig
 
 
+## setup
+
+```sh
+nix develop -c zsh
+```
+
 ## run
 
 ```sh

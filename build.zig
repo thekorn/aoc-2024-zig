@@ -13,7 +13,7 @@ pub fn build(b: *Build) void {
     var day: u32 = 1;
     while (day <= 25) : (day += 1) {
         const dayString = b.fmt("day{:0>2}", .{day});
-        const zigFile = b.fmt("src/{s}/main.zig", .{dayString});
+        const zigFile = b.fmt("src/{s}.zig", .{dayString});
 
         _ = std.fs.cwd().statFile(zigFile) catch continue;
 

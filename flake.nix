@@ -23,6 +23,8 @@
           nativeBuildInputs = with pkgs; [
             zig-overlay.packages.${system}."master-2024-11-30"
             zls-master.packages.${system}.default
+
+            hyperfine
           ];
         };
       }
