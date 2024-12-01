@@ -8,7 +8,7 @@ pub fn solve(content: []const u8, add_weight: bool) !i32 {
     var left = utils.List(i32).init(utils.gpa);
     var right = utils.List(i32).init(utils.gpa);
 
-    var counter = try utils.Counter(i32, i32).init(utils.gpa);
+    var counter = try utils.Counter(i32).init(utils.gpa);
 
     while (readIter.next()) |line| {
         var lineIter = std.mem.tokenizeSequence(u8, line, " ");

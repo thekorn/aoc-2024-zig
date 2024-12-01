@@ -54,14 +54,14 @@ pub fn codeToChar(code: usize) u8 {
     }
 }
 
-pub fn Counter(comptime K: type, comptime V: type) type {
+pub fn Counter(comptime K: type) type {
     return struct {
         const Self = @This();
-        items: Map(K, V),
+        items: Map(K, i32),
 
         pub fn init(alloc: Allocator) !Self {
             return .{
-                .items = Map(K, V).init(alloc),
+                .items = Map(K, i32).init(alloc),
             };
         }
 
@@ -74,8 +74,23 @@ pub fn Counter(comptime K: type, comptime V: type) type {
             }
         }
 
-        pub fn get(self: *Self, key: K) ?V {
+        pub fn get(self: *Self, key: K) ?i32 {
             return self.items.get(key);
         }
     };
+}
+
+test "utils - Counter" {
+    const CounterStr = Counter(i32);
+    var counter = try CounterStr.init(gpa);
+    try counter.add(1);
+    try counter.add(1);
+    try counter.add(2);
+    try counter.add(3);
+    try counter.add(5);
+    try counter.add(6);
+
+    try std.testing.expectEqual(2, counter.get(1));
+    try std.testing.expectEqual(1, counter.get(2));
+    try std.testing.expectEqual(null, counter.get(10));
 }
