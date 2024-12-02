@@ -2,30 +2,30 @@ const std = @import("std");
 const utils = @import("./utils.zig");
 
 const Values = struct {
-    left: []i32,
-    right: []i32,
-    counter: utils.Counter(i32),
+    left: []u32,
+    right: []u32,
+    counter: utils.Counter(u32),
 
     fn init(alloc: utils.Allocator, content: []const u8) !Values {
         var readIter = std.mem.tokenizeSequence(u8, content, "\n");
 
-        var left = utils.List(i32).init(alloc);
-        var right = utils.List(i32).init(alloc);
+        var left = utils.List(u32).init(alloc);
+        var right = utils.List(u32).init(alloc);
 
-        var counter = try utils.Counter(i32).init(alloc);
+        var counter = try utils.Counter(u32).init(alloc);
 
         while (readIter.next()) |line| {
             var lineIter = std.mem.tokenizeSequence(u8, line, " ");
-            try left.append(try utils.parseInt(i32, lineIter.next().?, 10));
+            try left.append(try utils.parseInt(u32, lineIter.next().?, 10));
 
-            const r = try utils.parseInt(i32, lineIter.next().?, 10);
+            const r = try utils.parseInt(u32, lineIter.next().?, 10);
             try counter.add(r);
             try right.append(r);
         }
         const l = try left.toOwnedSlice();
-        std.mem.sort(i32, l, {}, comptime std.sort.asc(i32));
+        std.mem.sort(u32, l, {}, comptime std.sort.asc(u32));
         const r = try right.toOwnedSlice();
-        std.mem.sort(i32, r, {}, comptime std.sort.asc(i32));
+        std.mem.sort(u32, r, {}, comptime std.sort.asc(u32));
 
         return .{
             .left = l,
@@ -35,8 +35,8 @@ const Values = struct {
     }
 };
 
-fn part1(content: []const u8) !i32 {
-    var result: i32 = 0;
+fn part1(content: []const u8) !u32 {
+    var result: u32 = 0;
     const values = try Values.init(utils.gpa, content);
 
     var i: usize = 0;
@@ -47,14 +47,15 @@ fn part1(content: []const u8) !i32 {
         const x = values.left[i];
         const y = values.right[i];
 
-        result += @intCast(@abs(y - x));
+        const diff: i64 = @as(i64, y) - @as(i64, x);
+        result += @intCast(@abs(diff));
     }
 
     return result;
 }
 
-fn part2(content: []const u8) !i32 {
-    var result: i32 = 0;
+fn part2(content: []const u8) !u32 {
+    var result: u32 = 0;
     var values = try Values.init(utils.gpa, content);
 
     var i: usize = 0;
@@ -64,8 +65,8 @@ fn part2(content: []const u8) !i32 {
         }
         const x = values.left[i];
 
-        const factor: i32 = values.counter.get(x) orelse 0;
-        result += @intCast(@abs(factor * x));
+        const factor: u32 = @intCast(values.counter.get(x) orelse 0);
+        result += factor * x;
     }
 
     return result;
@@ -89,7 +90,7 @@ test "day01 -> part1" {
         \\3   3
     ;
     const result = try part1(content);
-    try std.testing.expectEqual(@as(i32, 11), result);
+    try std.testing.expectEqual(@as(u32, 11), result);
 }
 
 test "day01 -> part2" {
@@ -102,5 +103,5 @@ test "day01 -> part2" {
         \\3   3
     ;
     const result = try part2(content);
-    try std.testing.expectEqual(@as(i32, 31), result);
+    try std.testing.expectEqual(@as(u32, 31), result);
 }

@@ -57,11 +57,11 @@ pub fn codeToChar(code: usize) u8 {
 pub fn Counter(comptime K: type) type {
     return struct {
         const Self = @This();
-        items: Map(K, i32),
+        items: Map(K, usize),
 
         pub fn init(alloc: Allocator) !Self {
             return .{
-                .items = Map(K, i32).init(alloc),
+                .items = Map(K, usize).init(alloc),
             };
         }
 
@@ -74,14 +74,14 @@ pub fn Counter(comptime K: type) type {
             }
         }
 
-        pub fn get(self: *Self, key: K) ?i32 {
+        pub fn get(self: *Self, key: K) ?usize {
             return self.items.get(key);
         }
     };
 }
 
 test "utils -> Counter" {
-    const CounterStr = Counter(i32);
+    const CounterStr = Counter(u32);
     var counter = try CounterStr.init(gpa);
     try counter.add(1);
     try counter.add(1);
