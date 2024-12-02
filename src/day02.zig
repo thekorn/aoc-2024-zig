@@ -135,3 +135,32 @@ test "day02 -> part2" {
     const result = try part2(content);
     try std.testing.expectEqual(@as(u32, 4), result);
 }
+
+test "day02 -> part2.1" {
+    const content =
+        \\1 2 3 4 5
+        \\1 20 19 18 17
+        \\1 20 3 4 5
+        \\1 20 19 20 17
+    ;
+    const result = try part2(content);
+    try std.testing.expectEqual(@as(u32, 3), result);
+}
+
+test "day02 -> part2.2" {
+    const content =
+        \\1 2 3 4 5
+        \\20 20 19 18 17
+    ;
+    const result = try part2(content);
+    try std.testing.expectEqual(@as(u32, 2), result);
+}
+
+test "day02 -> part2.3" {
+    const content =
+        \\1 2 3 4 5
+        \\1 5 6 7 8
+    ;
+    const result = try part2(content);
+    try std.testing.expectEqual(@as(u32, 2), result);
+}
