@@ -4,6 +4,19 @@ const utils = @import("./utils.zig");
 const Line = struct {
     items: []u32,
 
+    fn has_valid_mutation(self: *Line, allow_skip: bool, current_idx: usize) utils.Allocator.Error!bool {
+        if (allow_skip) {
+            for (0..3) |i| {
+                if (current_idx >= i) {
+                    var ln = try self.copy_without_item(current_idx - i);
+                    const valid = try ln.is_valid(false);
+                    if (valid) return true;
+                }
+            }
+        }
+        return false;
+    }
+
     fn is_valid(self: *Line, allow_skip: bool) !bool {
         var currentValue: ?u32 = null;
         var isIncreasing: ?bool = null;
@@ -14,34 +27,19 @@ const Line = struct {
                 continue;
             } else {
                 if (value == currentValue) {
-                    if (allow_skip) {
-                        var ln1 = try self.copy_without_item(idx);
-                        var ln2 = try self.copy_without_item(idx - 1);
-                        return try ln1.is_valid(false) or try ln2.is_valid(false);
-                    }
-                    return false;
+                    return try self.has_valid_mutation(allow_skip, idx);
                 }
                 const currentIsIncreasing = value > currentValue.?;
                 if (isIncreasing == null) {
                     isIncreasing = currentIsIncreasing;
                 } else {
                     if (isIncreasing != currentIsIncreasing) {
-                        if (allow_skip) {
-                            var ln1 = try self.copy_without_item(idx);
-                            var ln2 = try self.copy_without_item(idx - 1);
-                            return try ln1.is_valid(false) or try ln2.is_valid(false);
-                        }
-                        return false;
+                        return try self.has_valid_mutation(allow_skip, idx);
                     }
                 }
                 const diff: i64 = @as(i64, currentValue.?) - @as(i64, value);
                 if (@abs(diff) > 3) {
-                    if (allow_skip) {
-                        var ln1 = try self.copy_without_item(idx);
-                        var ln2 = try self.copy_without_item(idx - 1);
-                        return try ln1.is_valid(false) or try ln2.is_valid(false);
-                    }
-                    return false;
+                    return try self.has_valid_mutation(allow_skip, idx);
                 }
                 currentValue = value;
             }
@@ -49,7 +47,7 @@ const Line = struct {
         return true;
     }
 
-    fn copy_without_item(self: *Line, index: usize) !Line {
+    fn copy_without_item(self: *Line, index: usize) utils.Allocator.Error!Line {
         var items = utils.List(u32).init(utils.gpa);
 
         for (self.items, 0..) |value, idx| {
@@ -62,7 +60,7 @@ const Line = struct {
     }
 };
 
-fn part1(content: []const u8) !u32 {
+fn solve(content: []const u8, allow_skip: bool) !u32 {
     var safeCount: u32 = 0;
     var lineIter = std.mem.tokenizeSequence(u8, content, "\n");
 
@@ -73,33 +71,17 @@ fn part1(content: []const u8) !u32 {
             try items.append(try utils.parseInt(u32, cell, 10));
         }
         var ln = Line{ .items = try items.toOwnedSlice() };
-        if (try ln.is_valid(false)) safeCount += 1;
-    }
-    return safeCount;
-}
-
-fn part2(content: []const u8) !u32 {
-    var safeCount: u32 = 0;
-    var lineIter = std.mem.tokenizeSequence(u8, content, "\n");
-
-    while (lineIter.next()) |line| {
-        var items = utils.List(u32).init(utils.gpa);
-        var cellIter = std.mem.tokenizeSequence(u8, line, " ");
-        while (cellIter.next()) |cell| {
-            try items.append(try utils.parseInt(u32, cell, 10));
-        }
-        var ln = Line{ .items = try items.toOwnedSlice() };
-        if (try ln.is_valid(true)) safeCount += 1;
+        if (try ln.is_valid(allow_skip)) safeCount += 1;
     }
     return safeCount;
 }
 
 pub fn main() !void {
     const content = @embedFile("./data/day02.txt");
-    const result1 = try part1(content);
+    const result1 = try solve(content, false);
     utils.print("Result day 2 - part 2: {any}\n", .{result1});
-    const result2 = try part2(content);
-    utils.print("Result day 1 - part 2: {any}\n", .{result2});
+    const result2 = try solve(content, true);
+    utils.print("Result day 2 - part 2: {any}\n", .{result2});
 }
 
 test "day02 -> part1" {
@@ -111,7 +93,7 @@ test "day02 -> part1" {
         \\8 6 4 4 1
         \\1 3 6 7 9
     ;
-    const result = try part1(content);
+    const result = try solve(content, false);
     try std.testing.expectEqual(@as(u32, 2), result);
 }
 
@@ -132,7 +114,7 @@ test "day02 -> part2" {
         \\8 6 4 4 1
         \\1 3 6 7 9
     ;
-    const result = try part2(content);
+    const result = try solve(content, true);
     try std.testing.expectEqual(@as(u32, 4), result);
 }
 
@@ -143,7 +125,7 @@ test "day02 -> part2.1" {
         \\1 20 3 4 5
         \\1 20 19 20 17
     ;
-    const result = try part2(content);
+    const result = try solve(content, true);
     try std.testing.expectEqual(@as(u32, 3), result);
 }
 
@@ -152,7 +134,7 @@ test "day02 -> part2.2" {
         \\1 2 3 4 5
         \\20 20 19 18 17
     ;
-    const result = try part2(content);
+    const result = try solve(content, true);
     try std.testing.expectEqual(@as(u32, 2), result);
 }
 
@@ -161,6 +143,14 @@ test "day02 -> part2.3" {
         \\1 2 3 4 5
         \\1 5 6 7 8
     ;
-    const result = try part2(content);
+    const result = try solve(content, true);
     try std.testing.expectEqual(@as(u32, 2), result);
+}
+
+test "day02 -> part2.4" {
+    const content =
+        \\24 25 24 23 21 19 18 17
+    ;
+    const result = try solve(content, true);
+    try std.testing.expectEqual(@as(u32, 1), result);
 }
