@@ -1,5 +1,6 @@
 const std = @import("std");
 const utils = @import("./utils.zig");
+const Parts = utils.Parts;
 
 const Values = struct {
     left: []u32,
@@ -35,26 +36,7 @@ const Values = struct {
     }
 };
 
-fn part1(content: []const u8) !u32 {
-    var result: u32 = 0;
-    const values = try Values.init(utils.gpa, content);
-
-    var i: usize = 0;
-    while (true) : (i += 1) {
-        if (i >= values.left.len or i >= values.right.len) {
-            break;
-        }
-        const x = values.left[i];
-        const y = values.right[i];
-
-        const diff: i64 = @as(i64, y) - @as(i64, x);
-        result += @intCast(@abs(diff));
-    }
-
-    return result;
-}
-
-fn part2(content: []const u8) !u32 {
+fn solve(content: []const u8, part: Parts) !u32 {
     var result: u32 = 0;
     var values = try Values.init(utils.gpa, content);
 
@@ -64,9 +46,18 @@ fn part2(content: []const u8) !u32 {
             break;
         }
         const x = values.left[i];
+        const y = values.right[i];
 
-        const factor: u32 = @intCast(values.counter.get(x) orelse 0);
-        result += factor * x;
+        switch (part) {
+            Parts.one => {
+                const diff: i64 = @as(i64, y) - @as(i64, x);
+                result += @intCast(@abs(diff));
+            },
+            Parts.two => {
+                const factor: u32 = @intCast(values.counter.get(x) orelse 0);
+                result += factor * x;
+            },
+        }
     }
 
     return result;
@@ -74,9 +65,9 @@ fn part2(content: []const u8) !u32 {
 
 pub fn main() !void {
     const content = @embedFile("./data/day01.txt");
-    const result1 = try part1(content);
+    const result1 = try solve(content, Parts.one);
     utils.print("Result day 1 - part 1: {any}\n", .{result1});
-    const result2 = try part2(content);
+    const result2 = try solve(content, Parts.two);
     utils.print("Result day 1 - part 2: {any}\n", .{result2});
 }
 
@@ -89,7 +80,7 @@ test "day01 -> part1" {
         \\3   9
         \\3   3
     ;
-    const result = try part1(content);
+    const result = try solve(content, Parts.one);
     try std.testing.expectEqual(@as(u32, 11), result);
 }
 
@@ -102,6 +93,6 @@ test "day01 -> part2" {
         \\3   9
         \\3   3
     ;
-    const result = try part2(content);
+    const result = try solve(content, Parts.two);
     try std.testing.expectEqual(@as(u32, 31), result);
 }

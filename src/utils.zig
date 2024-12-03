@@ -38,6 +38,8 @@ pub const sort = std.sort.block;
 pub const asc = std.sort.asc;
 pub const desc = std.sort.desc;
 
+pub const Parts = enum { one, two };
+
 pub fn charCode(c: u8) usize {
     if (c >= 97 and c <= 122) {
         return c - 'a';

@@ -1,5 +1,7 @@
 const std = @import("std");
+
 const utils = @import("./utils.zig");
+const Parts = utils.Parts;
 
 const Line = struct {
     items: []u32,
@@ -60,7 +62,7 @@ const Line = struct {
     }
 };
 
-fn solve(content: []const u8, allow_skip: bool) !u32 {
+fn solve(content: []const u8, part: Parts) !u32 {
     var safeCount: u32 = 0;
     var lineIter = std.mem.tokenizeSequence(u8, content, "\n");
 
@@ -71,16 +73,16 @@ fn solve(content: []const u8, allow_skip: bool) !u32 {
             try items.append(try utils.parseInt(u32, cell, 10));
         }
         var ln = Line{ .items = try items.toOwnedSlice() };
-        if (try ln.is_valid(allow_skip)) safeCount += 1;
+        if (try ln.is_valid(part == Parts.two)) safeCount += 1;
     }
     return safeCount;
 }
 
 pub fn main() !void {
     const content = @embedFile("./data/day02.txt");
-    const result1 = try solve(content, false);
+    const result1 = try solve(content, Parts.one);
     utils.print("Result day 2 - part 2: {any}\n", .{result1});
-    const result2 = try solve(content, true);
+    const result2 = try solve(content, Parts.two);
     utils.print("Result day 2 - part 2: {any}\n", .{result2});
 }
 
@@ -93,7 +95,7 @@ test "day02 -> part1" {
         \\8 6 4 4 1
         \\1 3 6 7 9
     ;
-    const result = try solve(content, false);
+    const result = try solve(content, Parts.one);
     try std.testing.expectEqual(@as(u32, 2), result);
 }
 
@@ -114,7 +116,7 @@ test "day02 -> part2" {
         \\8 6 4 4 1
         \\1 3 6 7 9
     ;
-    const result = try solve(content, true);
+    const result = try solve(content, Parts.two);
     try std.testing.expectEqual(@as(u32, 4), result);
 }
 
@@ -125,7 +127,7 @@ test "day02 -> part2.1" {
         \\1 20 3 4 5
         \\1 20 19 20 17
     ;
-    const result = try solve(content, true);
+    const result = try solve(content, Parts.two);
     try std.testing.expectEqual(@as(u32, 3), result);
 }
 
@@ -134,7 +136,7 @@ test "day02 -> part2.2" {
         \\1 2 3 4 5
         \\20 20 19 18 17
     ;
-    const result = try solve(content, true);
+    const result = try solve(content, Parts.two);
     try std.testing.expectEqual(@as(u32, 2), result);
 }
 
@@ -143,7 +145,7 @@ test "day02 -> part2.3" {
         \\1 2 3 4 5
         \\1 5 6 7 8
     ;
-    const result = try solve(content, true);
+    const result = try solve(content, Parts.two);
     try std.testing.expectEqual(@as(u32, 2), result);
 }
 
@@ -151,6 +153,6 @@ test "day02 -> part2.4" {
     const content =
         \\24 25 24 23 21 19 18 17
     ;
-    const result = try solve(content, true);
+    const result = try solve(content, Parts.two);
     try std.testing.expectEqual(@as(u32, 1), result);
 }
